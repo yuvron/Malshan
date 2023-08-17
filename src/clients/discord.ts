@@ -14,14 +14,17 @@ import { InteractionWithCommandName } from '../types/interactionWithCommandName'
 import { getCommands } from '../utils/getCommands';
 import WhatsappClient from './whatsapp';
 import Singleton from '../utils/singleton';
+import { getIgnoredUsers } from '../utils/getIgnoredUsers';
 
 export default class DiscordClient extends Singleton {
 	client: ClientWithCommands;
 	rest: REST;
 	whatsappClient: WhatsappClient;
 	recentlyConnected: string[];
+	ignoredUsers: string[];
+	usersCount: number;
 
-	constructor(whatsappClient: WhatsappClient) {
+	constructor() {
 		super(DiscordClient);
 		if (this.client) {
 			return;
@@ -36,8 +39,10 @@ export default class DiscordClient extends Singleton {
 		}) as ClientWithCommands;
 		this.client.commands = getCommands();
 		this.rest = new REST({ version: '9' }).setToken(config.botToken);
-		this.whatsappClient = whatsappClient;
+		this.whatsappClient = new WhatsappClient();
 		this.recentlyConnected = [];
+		this.ignoredUsers = getIgnoredUsers();
+		this.usersCount = 0;
 
 		this.handleReady = this.handleReady.bind(this);
 		this.handleInteractionCreate = this.handleInteractionCreate.bind(this);
@@ -62,15 +67,28 @@ export default class DiscordClient extends Singleton {
 
 	async handleVoiceStateUpdate(before: VoiceState, after: VoiceState) {
 		if (before.guild.id === config.serverId) {
-			if (after.channelId && after.channel.id !== config.afkChannelId) {
-				const { user } = (await this.rest.get(
-					Routes.guildMember(config.serverId, before.id)
-				)) as GuildMember;
+			const didUserJoin = !before.channelId && after.channelId;
+			const didUserLeave = before.channelId && !after.channelId;
+
+			if (!(didUserJoin || didUserLeave)) {
+				return;
+			}
+
+			const { user } = (await this.rest.get(
+				Routes.guildMember(config.serverId, before.id)
+			)) as GuildMember;
+
+			if (this.ignoredUsers.includes(user.username)) {
+				return;
+			}
+
+			if (didUserJoin && after.channel.id !== config.afkChannelId) {
+				this.usersCount++;
 				if (!this.recentlyConnected.includes(user.id)) {
 					console.log(`Discord Bot - ${user['global_name'] || user.username} connected`);
-					const msg = `🔴   🔴   🔴\n\n*${
-						user['global_name'] || user.username
-					}* is online!\n\n🔴   🔴   🔴`;
+					const msg = `*${user['global_name'] || user.username}* is online!\n\n*${
+						this.usersCount
+					}* ${this.usersCount === 1 ? 'person is' : 'people are'} in\n\n🔴   🔴   🔴`;
 					await this.whatsappClient.sendMessage(msg);
 					this.recentlyConnected.push(user.id);
 					setTimeout(
@@ -78,6 +96,8 @@ export default class DiscordClient extends Singleton {
 						config.connectionCooldownMinutes * 60 * 1000
 					);
 				}
+			} else {
+				this.usersCount--;
 			}
 		}
 	}

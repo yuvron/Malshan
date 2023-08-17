@@ -1,11 +1,13 @@
-import { Client, LocalAuth } from 'whatsapp-web.js';
+import { Client, LocalAuth, Message } from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 import { config } from '../utils/config';
 import Singleton from '../utils/singleton';
+import DiscordClient from './discord';
 
 export default class WhatsappClient extends Singleton {
 	client: Client;
 	isReady: boolean;
+	discordClient: DiscordClient;
 
 	constructor() {
 		super(WhatsappClient);
@@ -17,6 +19,7 @@ export default class WhatsappClient extends Singleton {
 		this.client = new Client({
 			authStrategy: new LocalAuth(),
 		});
+		this.discordClient = new DiscordClient();
 
 		this.client.on('loading_screen', (percent, message) => {
 			console.log(`WhatsApp Bot - loading ${percent}%`);
@@ -39,7 +42,19 @@ export default class WhatsappClient extends Singleton {
 			this.isReady = true;
 		});
 
+		this.client.on('message_create', (msg) => this.handleMessageCreate(msg));
+
 		this.client.initialize();
+	}
+
+	async handleMessageCreate(msg: Message) {
+		if (msg.to === config.whatsappChatId && msg.body === 'מישהו פה?') {
+			await msg.reply(
+				`*${this.discordClient.usersCount}* ${
+					this.discordClient.usersCount === 1 ? 'person is' : 'people are'
+				} in`
+			);
+		}
 	}
 
 	async sendMessage(msg: string) {
