@@ -93,7 +93,7 @@ export default class DiscordClient extends Singleton {
 					this.recentlyConnected.push(user.id);
 					setTimeout(
 						() => this.recentlyConnected.splice(this.recentlyConnected.indexOf(user.id), 1),
-						config.connectionCooldownMinutes * 60 * 1000
+						config.cooldownMinutes * 60 * 1000
 					);
 				}
 			} else {

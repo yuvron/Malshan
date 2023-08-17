@@ -8,6 +8,7 @@ export default class WhatsappClient extends Singleton {
 	client: Client;
 	isReady: boolean;
 	discordClient: DiscordClient;
+	isUsersCountInCooldown: boolean;
 
 	constructor() {
 		super(WhatsappClient);
@@ -20,6 +21,7 @@ export default class WhatsappClient extends Singleton {
 			authStrategy: new LocalAuth(),
 		});
 		this.discordClient = new DiscordClient();
+		this.isUsersCountInCooldown = false;
 
 		this.client.on('loading_screen', (percent, message) => {
 			console.log(`WhatsApp Bot - loading ${percent}%`);
@@ -49,11 +51,10 @@ export default class WhatsappClient extends Singleton {
 
 	async handleMessageCreate(msg: Message) {
 		if (msg.to === config.whatsappChatId && msg.body === 'מישהו פה?') {
-			await msg.reply(
-				`*${this.discordClient.usersCount}* ${
-					this.discordClient.usersCount === 1 ? 'person is' : 'people are'
-				} in`
-			);
+			this.isUsersCountInCooldown = true;
+			setTimeout(() => (this.isUsersCountInCooldown = false), config.cooldownMinutes * 60 * 1000);
+			const { usersCount } = this.discordClient;
+			await msg.reply(`*${usersCount}* ${usersCount === 1 ? 'person is' : 'people are'} in`);
 		}
 	}
 
