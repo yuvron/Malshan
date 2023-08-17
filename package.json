@@ -1,0 +1,27 @@
+{
+	"name": "discord",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "node dist/index.js",
+		"dev": "nodemon src/index.ts",
+		"build": "tsc",
+		"deploy-commands": "node dist/scripts/deploy-commands.js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@discordjs/rest": "^2.0.0",
+		"discord.js": "^14.12.1",
+		"dotenv": "^16.3.1",
+		"qrcode-terminal": "^0.12.0",
+		"whatsapp-web.js": "^1.22.1"
+	},
+	"devDependencies": {
+		"@types/node": "^20.5.0",
+		"nodemon": "^3.0.1",
+		"ts-node": "^10.9.1"
+	}
+}
