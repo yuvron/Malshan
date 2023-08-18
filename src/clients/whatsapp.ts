@@ -30,6 +30,7 @@ export default class WhatsappClient extends Singleton {
 		});
 
 		this.client.on('qr', (qr) => {
+			console.log('WhatsApp Bot - generating qr code');
 			qrcode.generate(qr, { small: true });
 		});
 

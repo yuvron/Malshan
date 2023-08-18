@@ -75,7 +75,7 @@ export default class DiscordClient extends Singleton {
 			return;
 		}
 
-		const isAfkChannel = after.channel.id !== config.afkChannelId;
+		const isAfkChannel = after.channel.id === config.afkChannelId;
 		if (isAfkChannel) {
 			return;
 		}
