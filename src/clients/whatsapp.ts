@@ -64,9 +64,9 @@ export default class WhatsappClient extends Singleton {
 			const connectedUsers = await this.discordClient.getConnectedUsers();
 			const usersCount = connectedUsers.length;
 			await msg.reply(
-				`*${numberEmojis[usersCount]}* ${
-					usersCount === 1 ? 'person is' : 'people are'
-				} in\n\n${connectedUsers.map((user) => `☢️ *${user}*`).join('\n\n')}`
+				`*${numberEmojis[usersCount]}* ${usersCount === 1 ? 'person is' : 'people are'} in${
+					connectedUsers.length > 0 ? '\n\n' : ''
+				}${connectedUsers.map((user) => `☢️ *${user}*`).join('\n\n')}`
 			);
 		}
 	}
