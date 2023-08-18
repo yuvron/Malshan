@@ -7,5 +7,5 @@ export const config = {
 	serverId: process.env['SERVER_ID'],
 	afkChannelId: process.env['AFK_CHANNEL_ID'],
 	whatsappChatId: process.env['WHATSAPP_CHAT_ID'],
-	cooldownMinutes: +process.env['COOLDOWN_MINUTES'],
+	cooldownMinutes: +process.env['COOLDOWN_MINUTES'] || 10,
 };
