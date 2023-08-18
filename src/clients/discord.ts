@@ -1,11 +1,13 @@
 import { config } from '../utils/config';
 import {
 	Client,
+	Collection,
 	Events,
 	GatewayIntentBits,
 	GuildMember,
 	Interaction,
 	Routes,
+	VoiceChannel,
 	VoiceState,
 } from 'discord.js';
 import { REST } from '@discordjs/rest';
@@ -22,7 +24,6 @@ export default class DiscordClient extends Singleton {
 	whatsappClient: WhatsappClient;
 	recentlyConnected: string[];
 	ignoredUsers: string[];
-	usersCount: number;
 
 	constructor() {
 		super(DiscordClient);
@@ -42,7 +43,6 @@ export default class DiscordClient extends Singleton {
 		this.whatsappClient = new WhatsappClient();
 		this.recentlyConnected = [];
 		this.ignoredUsers = getIgnoredUsers();
-		this.usersCount = 0;
 
 		this.handleReady = this.handleReady.bind(this);
 		this.handleInteractionCreate = this.handleInteractionCreate.bind(this);
@@ -66,39 +66,56 @@ export default class DiscordClient extends Singleton {
 	}
 
 	async handleVoiceStateUpdate(before: VoiceState, after: VoiceState) {
-		if (before.guild.id === config.serverId) {
-			const didUserJoin = !before.channelId && after.channelId;
-			const didUserLeave = before.channelId && !after.channelId;
+		if (before.guild.id !== config.serverId) {
+			return;
+		}
 
-			if (!(didUserJoin || didUserLeave)) {
-				return;
-			}
+		const didUserJoin = !before.channelId && after.channelId;
+		if (!didUserJoin) {
+			return;
+		}
 
-			const { user } = (await this.rest.get(
-				Routes.guildMember(config.serverId, before.id)
-			)) as GuildMember;
+		const isAfkChannel = after.channel.id !== config.afkChannelId;
+		if (isAfkChannel) {
+			return;
+		}
 
-			if (this.ignoredUsers.includes(user.username)) {
-				return;
-			}
+		const { user } = (await this.rest.get(
+			Routes.guildMember(config.serverId, before.id)
+		)) as GuildMember;
+		if (this.ignoredUsers.includes(user.username)) {
+			return;
+		}
 
-			if (didUserJoin && after.channel.id !== config.afkChannelId) {
-				this.usersCount++;
-				if (!this.recentlyConnected.includes(user.id)) {
-					console.log(`Discord Bot - ${user['global_name'] || user.username} connected`);
-					const msg = `*${user['global_name'] || user.username}* is online!\n\n*${
-						this.usersCount
-					}* ${this.usersCount === 1 ? 'person is' : 'people are'} in\n\n🔴   🔴   🔴`;
-					await this.whatsappClient.sendMessage(msg);
-					this.recentlyConnected.push(user.id);
-					setTimeout(
-						() => this.recentlyConnected.splice(this.recentlyConnected.indexOf(user.id), 1),
-						config.cooldownMinutes * 60 * 1000
-					);
+		if (!this.recentlyConnected.includes(user.id)) {
+			const usersCount = (await this.getConnectedUsers()).length;
+			console.log(`Discord Bot - ${user['global_name'] || user.username} connected`);
+			const msg = `*${user['global_name'] || user.username}* is online!\n\n*${usersCount}* ${
+				usersCount === 1 ? 'person is' : 'people are'
+			} in\n\n🔴   🔴   🔴`;
+			await this.whatsappClient.sendMessage(msg);
+			this.recentlyConnected.push(user.id);
+			setTimeout(
+				() => this.recentlyConnected.splice(this.recentlyConnected.indexOf(user.id), 1),
+				config.cooldownMinutes * 60 * 1000
+			);
+		}
+	}
+
+	async getConnectedUsers(): Promise<string[]> {
+		let guild = this.client.guilds.cache.get(config.serverId);
+		const channels = await guild.channels.fetch();
+		const connectedUsers: string[] = [];
+		for (const channel of channels) {
+			if (channel[1] instanceof VoiceChannel && channel[1].id !== config.afkChannelId) {
+				const channelMembers = channel[1].members as Collection<string, GuildMember>;
+				for (const member of channelMembers) {
+					if (!this.ignoredUsers.includes(member[1].user.username)) {
+						connectedUsers.push(member[1].user.globalName || member[1].user.username);
+					}
 				}
-			} else {
-				this.usersCount--;
 			}
 		}
+		return connectedUsers;
 	}
 }

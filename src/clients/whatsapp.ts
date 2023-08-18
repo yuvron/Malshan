@@ -4,6 +4,8 @@ import { config } from '../utils/config';
 import Singleton from '../utils/singleton';
 import DiscordClient from './discord';
 
+const numberEmojis = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+
 export default class WhatsappClient extends Singleton {
 	client: Client;
 	isReady: boolean;
@@ -50,11 +52,22 @@ export default class WhatsappClient extends Singleton {
 	}
 
 	async handleMessageCreate(msg: Message) {
-		if (msg.to === config.whatsappChatId && msg.body === 'מישהו פה?') {
+		if (
+			(msg.to === config.whatsappChatId || msg.from === config.whatsappChatId) &&
+			msg.body === 'מישהו פה?'
+		) {
+			if (this.isUsersCountInCooldown) {
+				return;
+			}
 			this.isUsersCountInCooldown = true;
 			setTimeout(() => (this.isUsersCountInCooldown = false), config.cooldownMinutes * 60 * 1000);
-			const { usersCount } = this.discordClient;
-			await msg.reply(`*${usersCount}* ${usersCount === 1 ? 'person is' : 'people are'} in`);
+			const connectedUsers = await this.discordClient.getConnectedUsers();
+			const usersCount = connectedUsers.length;
+			await msg.reply(
+				`*${numberEmojis[usersCount]}* ${
+					usersCount === 1 ? 'person is' : 'people are'
+				} in\n\n${connectedUsers.map((user) => `☢️ *${user}*`).join('\n\n')}`
+			);
 		}
 	}
 
