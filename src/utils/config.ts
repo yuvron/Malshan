@@ -8,4 +8,5 @@ export const config = {
 	afkChannelId: process.env['AFK_CHANNEL_ID'],
 	whatsappChatId: process.env['WHATSAPP_CHAT_ID'],
 	cooldownMinutes: +process.env['COOLDOWN_MINUTES'] || 10,
+	logToFile: process.env['LOG_TO_FILE'].toLowerCase() === 'true',
 };
