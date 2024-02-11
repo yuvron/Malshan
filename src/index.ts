@@ -1,22 +1,29 @@
-import DiscordClient from './clients/discord';
-import WhatsappClient from './clients/whatsapp';
-import fs from 'fs';
+import path from 'path';
+import express from 'express';
+import qrcode from 'qrcode';
 import { config } from './utils/config';
+import Manager from './manager';
 
-if (config.logToFile) {
-	if (!fs.existsSync('./logs')) {
-		fs.mkdirSync('./logs');
+const manager = new Manager();
+
+const app = express();
+
+app.get('/', (req, res) => {
+	res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+app.get('/qrcode', async (req, res) => {
+	if (manager.isWhatsappReady()) {
+		res.send('OK');
+	} else if (manager.getWhatsappQrCode()) {
+		const qrSvg = await qrcode.toString(manager.getWhatsappQrCode(), { type: 'svg', width: 600 });
+		res.type('svg');
+		res.send(qrSvg);
+	} else {
+		res.send('WAITING');
 	}
-	const logStream = fs.createWriteStream(
-		`./logs/${new Date()
-			.toISOString()
-			.slice(0, 16)
-			.replace(/[-T:.]/g, '_')}.log`,
-		{ flags: 'a' }
-	);
-	process.stdout.write = logStream.write.bind(logStream);
-	process.stderr.write = logStream.write.bind(logStream);
-}
+});
 
-const whatsapp = new WhatsappClient();
-const discord = new DiscordClient();
+app.listen(config.serverPort, () =>
+	console.log(`listening on http://localhost:${config.serverPort}`)
+);

@@ -1,5 +1,5 @@
 import { ICommand } from '../interfaces/command';
-import { SlashCommandBuilder, Message } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 
 const ping: ICommand = {
 	data: new SlashCommandBuilder().setName('ping').setDescription('Replies with pong!'),
