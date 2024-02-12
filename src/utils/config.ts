@@ -12,10 +12,13 @@ export const config = {
 		applicationId: process.env['DISCORD_APPLICATION_ID'],
 		serverId: process.env['DISCORD_SERVER_ID'],
 		afkChannelId: process.env['DISCORD_AFK_CHANNEL_ID'],
+		isLogServerId: process.env['DISCORD_IS_LOG_SERVER_ID'].toLowerCase() === 'true',
+		isLogChannelId: process.env['DISCORD_IS_LOG_CHANNEL_ID'].toLowerCase() === 'true',
 	},
 	whatsapp: {
 		chatId: process.env['WHATSAPP_CHAT_ID'],
 		questionMessage: process.env['WHATSAPP_QUESTION_MESSAGE'],
+		isLogChatId: process.env['WHATSAPP_IS_LOG_CHAT_ID'].toLowerCase() === 'true',
 	},
 };
 

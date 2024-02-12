@@ -24,6 +24,8 @@ export default class DiscordClient {
 	whatsappSendMessage: (msg: string) => Promise<void>;
 	serverId: string;
 	afkChannelId: string;
+	isLogServerId: boolean;
+	isLogChannelId: boolean;
 	cooldownMinutes: number;
 
 	constructor(whatsappSendMessage: (msg: string) => Promise<void>) {
@@ -54,6 +56,8 @@ export default class DiscordClient {
 
 		this.serverId = config.discord.serverId;
 		this.afkChannelId = config.discord.afkChannelId;
+		this.isLogServerId = config.discord.isLogServerId;
+		this.isLogChannelId = config.discord.isLogChannelId;
 		this.cooldownMinutes = config.cooldownMinutes;
 	}
 
@@ -68,6 +72,12 @@ export default class DiscordClient {
 	}
 
 	async handleVoiceStateUpdate(before: VoiceState, after: VoiceState) {
+		if (this.isLogServerId) {
+			console.log(`Discord Bot - server id: ${before.guild.id}`);
+		}
+		if (this.isLogChannelId) {
+			console.log(`Discord Bot - channel id: ${after.channelId}`);
+		}
 		if (before.guild.id !== this.serverId) {
 			return;
 		}

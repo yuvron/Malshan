@@ -12,6 +12,7 @@ export default class WhatsappClient {
 	chatId: string;
 	questionMessage: string;
 	cooldownMinutes: number;
+	isLogChatId: boolean;
 
 	constructor(discordGetConnectedUsers: () => Promise<string[]>) {
 		this.discordGetConnectedUsers = discordGetConnectedUsers;
@@ -45,9 +46,13 @@ export default class WhatsappClient {
 		this.chatId = config.whatsapp.chatId;
 		this.questionMessage = config.whatsapp.questionMessage;
 		this.cooldownMinutes = config.cooldownMinutes;
+		this.isLogChatId = config.whatsapp.isLogChatId;
 	}
 
 	async handleMessageCreate(msg: Message) {
+		if (this.isLogChatId) {
+			console.log(`WhatsApp Bot - chat id from: ${msg.from}, chat id to: ${msg.to}`);
+		}
 		if ((msg.to === this.chatId || msg.from === this.chatId) && msg.body === this.questionMessage) {
 			if (this.isUsersCountOnCooldown) {
 				return;

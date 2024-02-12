@@ -13,7 +13,7 @@ npm install
 npm run build
 ```
 
-2. Copy the `.env.example` file located in the root folder, to a `.env` file, remove all comments and fill the variables with your own data.
+2. Copy the `.env.example` file located in the root folder, to a `.env` file, remove all comments and fill the variables with your own data [explanation](#Environment-Variables).
 
 3. If there are Discord users you want to ignore like music bots and similar, copy the `.ignoredUsers.json.example` file located in the `data` folder to a `.ignoredUsers.json` file, add the users you want to ignore in a list.
 
@@ -36,3 +36,24 @@ npm start
 ### When someone asks if someone is here
 
 ![Dashboard](./readme/question.png)
+
+## Environment Variables
+
+There is a description for every variable in the `.env.example` file, but some variables are not straightforward.
+
+1. `DISCORD_BOT_TOKEN` and `DISCORD_APPLICATION_ID`:  
+   In order to get these values you will have to create a new application in the [discord developer portal](https://discord.com/developers/applications).  
+   The application ID will be in the 'General Information' tab.  
+   The bot token is available in the `Bot` tab.  
+   Don't forget to invite your bot to your Discord server.
+2. `DISCORD_SERVER_ID`and `DISCORD_AFK_CHANNEL_ID`:
+   In order to get these values you will have to set `DISCORD_IS_LOG_SERVER_ID` and `DISCORD_IS_LOG_CHANNEL_ID` to `true`.  
+   Then run the application and join a voice channel in a Discord server your bot is already in.  
+   The server id and the channel id should be printed.
+3. `WHATSAPP_CHAT_ID`:  
+   In order to get this value you will have to set `WHATSAPP_IS_LOG_CHAT_ID` to `true`.  
+   Then send a WhatsApp message in the group you'd like to listen to.  
+   The chat id should be printed, if the same user who authenticated sent the message, the group chat id will be printed in the `chat id to` part, otherwise the chat id will be printed in the `chat id from` part.  
+   Don't forget to authenticate using the QR code before trying to send messages.
+
+#### Note: You might need to fill some variables with random string in order to run the application when trying to gather initial information.
