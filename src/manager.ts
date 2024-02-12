@@ -6,8 +6,8 @@ export default class Manager {
 	discordClient: DiscordClient;
 
 	constructor() {
-		this.whatsappClient = new WhatsappClient(this.discordGetConnectedUsers);
-		this.discordClient = new DiscordClient(this.whatsappSendMessage);
+		this.whatsappClient = new WhatsappClient(() => this.discordGetConnectedUsers());
+		this.discordClient = new DiscordClient((msg: string) => this.whatsappSendMessage(msg));
 	}
 
 	async discordGetConnectedUsers(): Promise<string[]> {

@@ -15,6 +15,7 @@ export const config = {
 	},
 	whatsapp: {
 		chatId: process.env['WHATSAPP_CHAT_ID'],
+		questionMessage: process.env['WHATSAPP_QUESTION_MESSAGE'],
 	},
 };
 

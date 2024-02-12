@@ -10,6 +10,7 @@ export default class WhatsappClient {
 	isUsersCountOnCooldown: boolean;
 	discordGetConnectedUsers: () => Promise<string[]>;
 	chatId: string;
+	questionMessage: string;
 	cooldownMinutes: number;
 
 	constructor(discordGetConnectedUsers: () => Promise<string[]>) {
@@ -42,11 +43,12 @@ export default class WhatsappClient {
 		this.client.initialize();
 
 		this.chatId = config.whatsapp.chatId;
+		this.questionMessage = config.whatsapp.questionMessage;
 		this.cooldownMinutes = config.cooldownMinutes;
 	}
 
 	async handleMessageCreate(msg: Message) {
-		if ((msg.to === this.chatId || msg.from === this.chatId) && msg.body === 'מישהו פה?') {
+		if ((msg.to === this.chatId || msg.from === this.chatId) && msg.body === this.questionMessage) {
 			if (this.isUsersCountOnCooldown) {
 				return;
 			}
