@@ -13,9 +13,9 @@ npm install
 npm run build
 ```
 
-2. Copy the `.env.example` file located in the root folder, to a `.env` file, remove all comments and fill the variables with your own data [explanation](#Environment-Variables).
+2. Copy the `.env.example` file located in the root folder, to a `.env` file, remove all comments and fill the variables with your own data. [Explained here](#Environment-Variables).
 
-3. If there are Discord users you want to ignore like music bots and similar, copy the `.ignoredUsers.json.example` file located in the `data` folder to a `.ignoredUsers.json` file, add the users you want to ignore in a list.
+3. Copy the `.ignoredUsers.json.example` file located in the `data` folder to a `.ignoredUsers.json` file, add the users you want to ignore in the list (can be left empty). This is relevant for music bots and similar Discord users you don't want to receive messages for.
 
 4. Start the application and head to the http endpoint (http:localhost:<serverPort>) to see the status.
 
