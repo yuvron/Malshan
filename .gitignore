@@ -4,3 +4,5 @@ node_modules
 dist
 logs
 data/ignoredUsers.json
+Discord Bot.xml
+malshan.bat
