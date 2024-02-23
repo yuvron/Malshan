@@ -1,20 +1,10 @@
-import { config } from '../utils/config';
-import {
-	Client,
-	Collection,
-	Events,
-	GatewayIntentBits,
-	GuildMember,
-	Interaction,
-	Routes,
-	VoiceChannel,
-	VoiceState,
-} from 'discord.js';
-import { REST } from '@discordjs/rest';
-import { ClientWithCommands } from '../types/clientWithCommands';
-import { InteractionWithCommandName } from '../types/interactionWithCommandName';
-import { getCommands } from '../utils/getCommands';
-import { getIgnoredUsers } from '../utils/getIgnoredUsers';
+import { config } from "../utils/config";
+import { Client, Collection, Events, GatewayIntentBits, GuildMember, Interaction, Routes, VoiceChannel, VoiceState } from "discord.js";
+import { REST } from "@discordjs/rest";
+import { ClientWithCommands } from "../types/clientWithCommands";
+import { InteractionWithCommandName } from "../types/interactionWithCommandName";
+import { getCommands } from "../utils/getCommands";
+import { getIgnoredUsers } from "../utils/getIgnoredUsers";
 
 export default class DiscordClient {
 	client: ClientWithCommands;
@@ -32,15 +22,11 @@ export default class DiscordClient {
 		this.whatsappSendMessage = whatsappSendMessage;
 
 		this.client = new Client({
-			intents: [
-				GatewayIntentBits.Guilds,
-				GatewayIntentBits.GuildMessages,
-				GatewayIntentBits.GuildVoiceStates,
-			],
+			intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates],
 		}) as ClientWithCommands;
 		this.client.commands = getCommands();
 		const botToken = config.discord.botToken;
-		this.rest = new REST({ version: '9' }).setToken(botToken);
+		this.rest = new REST({ version: "9" }).setToken(botToken);
 		this.recentlyConnected = [];
 		this.ignoredUsers = getIgnoredUsers();
 
@@ -90,25 +76,24 @@ export default class DiscordClient {
 			return;
 		}
 
-		const { user } = (await this.rest.get(
-			Routes.guildMember(this.serverId, before.id)
-		)) as GuildMember;
+		const { user } = (await this.rest.get(Routes.guildMember(this.serverId, before.id))) as GuildMember;
 		if (this.ignoredUsers.includes(user.username)) {
 			return;
 		}
 
 		if (!this.recentlyConnected.includes(user.id)) {
 			const usersCount = (await this.getConnectedUsers()).length;
-			console.log(`Discord Bot - ${user['global_name'] || user.username} connected`);
-			const msg = `*${user['global_name'] || user.username}* is online!\n\n*${usersCount}* ${
-				usersCount === 1 ? 'person is' : 'people are'
-			} in\n\n🔴   🔴   🔴`;
+			console.log(`Discord Bot - ${user["global_name"] || user.username} connected`);
+			let msg = "";
+			if (user["global_name"] !== "בר 👈🏿") {
+				msg = `*${user["global_name"] || user.username}* is online!\n\n*${usersCount}* ${usersCount === 1 ? "person is" : "people are"} in\n\n🔴   🔴   🔴`;
+			} else {
+				msg = `Unfortunately ${user["global_name"]} is Online...\n\n${user["global_name"]} is alone\n\nBut the server is still full 🍔🍔🍔
+				`;
+			}
 			await this.whatsappSendMessage(msg);
 			this.recentlyConnected.push(user.id);
-			setTimeout(
-				() => this.recentlyConnected.splice(this.recentlyConnected.indexOf(user.id), 1),
-				this.cooldownMinutes * 60 * 1000
-			);
+			setTimeout(() => this.recentlyConnected.splice(this.recentlyConnected.indexOf(user.id), 1), this.cooldownMinutes * 60 * 1000);
 		}
 	}
 

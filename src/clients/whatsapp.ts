@@ -1,7 +1,7 @@
-import { Client, LocalAuth, Message } from 'whatsapp-web.js';
-import { config } from '../utils/config';
+import { Client, LocalAuth, Message } from "whatsapp-web.js";
+import { config } from "../utils/config";
 
-const numberEmojis = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+const numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
 
 export default class WhatsappClient {
 	client: Client;
@@ -22,24 +22,30 @@ export default class WhatsappClient {
 		});
 		this.isUsersCountOnCooldown = false;
 
-		this.client.on('loading_screen', (percent) => {
+		this.client.on("loading_screen", (percent) => {
 			console.log(`WhatsApp Bot - loading ${percent}%`);
 		});
-		this.client.on('qr', (qr) => {
-			console.log('WhatsApp Bot - generating qr code');
+		this.client.on("qr", (qr) => {
+			console.log("WhatsApp Bot - generating qr code");
 			this.qrCode = qr;
 		});
-		this.client.on('authenticated', () => {
-			console.log('WhatsApp Bot - authenticated');
+		this.client.on("authenticated", () => {
+			console.log("WhatsApp Bot - authenticated");
 		});
-		this.client.on('auth_failure', (msg) => {
+		this.client.on("auth_failure", (msg) => {
 			console.error(`WhatsApp Bot - authentication failed: ${msg}`);
 		});
-		this.client.on('ready', () => {
-			console.log('WhatsApp Bot - ready');
+		this.client.on("ready", async () => {
+			console.log("WhatsApp Bot - ready");
+			this.client.sendMessage(
+				this.chatId,
+				`I'm Here Beautiful people! \n\n${numberEmojis[(await this.discordGetConnectedUsers()).length]} ${
+					(await this.discordGetConnectedUsers()).length === 1 ? "person is" : "people are"
+				} in`
+			);
 			this.isReady = true;
 		});
-		this.client.on('message_create', (msg) => this.handleMessageCreate(msg));
+		this.client.on("message_create", (msg) => this.handleMessageCreate(msg));
 
 		this.client.initialize();
 
@@ -61,11 +67,15 @@ export default class WhatsappClient {
 			setTimeout(() => (this.isUsersCountOnCooldown = false), this.cooldownMinutes * 60 * 1000);
 			const connectedUsers = await this.discordGetConnectedUsers();
 			const usersCount = connectedUsers.length;
-			await msg.reply(
-				`*${numberEmojis[usersCount]}* ${usersCount === 1 ? 'person is' : 'people are'} in${
-					connectedUsers.length > 0 ? '\n\n' : ''
-				}${connectedUsers.map((user) => `☢️ *${user}*`).join('\n\n')}`
-			);
+			if (!msg.author.includes("526618184")) {
+				await msg.reply(
+					`*${numberEmojis[usersCount]}* ${usersCount === 1 ? "person is" : "people are"} in${connectedUsers.length > 0 ? "\n\n" : ""}${connectedUsers
+						.map((user) => `☢️ *${user}*`)
+						.join("\n\n")}`
+				);
+			} else {
+				await msg.reply(`*${numberEmojis[0]}* people are in\n\n No one likes you..`);
+			}
 		}
 	}
 
@@ -73,7 +83,7 @@ export default class WhatsappClient {
 		if (this.isReady) {
 			await this.client.sendMessage(this.chatId, msg);
 		} else {
-			console.error('WhatsApp Bot - tried to send message before whatsapp client is ready');
+			console.error("WhatsApp Bot - tried to send message before whatsapp client is ready");
 		}
 	}
 }
