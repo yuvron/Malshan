@@ -17,8 +17,14 @@ export default class WhatsappClient {
 	constructor(discordGetConnectedUsers: () => Promise<string[]>) {
 		this.discordGetConnectedUsers = discordGetConnectedUsers;
 		this.isReady = false;
+		const wwebVersion = '2.2410.1';
 		this.client = new Client({
 			authStrategy: new LocalAuth(),
+			// webVersionCache: {
+			// 	type: 'remote',
+			// 	remotePath:
+			// 		'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+			// },
 		});
 		this.isUsersCountOnCooldown = false;
 
@@ -53,12 +59,22 @@ export default class WhatsappClient {
 		if (this.isLogChatId) {
 			console.log(`WhatsApp Bot - chat id from: ${msg.from}, chat id to: ${msg.to}`);
 		}
-		if ((msg.to === this.chatId || msg.from === this.chatId) && msg.body === this.questionMessage) {
+		if (
+			(msg.to === this.chatId || msg.from === this.chatId) &&
+			msg.body === this.questionMessage
+		) {
+			if (msg.author === '972545462455@c.us') {
+				await msg.reply("סתום את הפה יא ג'ינג'י לא רק בזקן");
+				return;
+			}
 			if (this.isUsersCountOnCooldown) {
 				return;
 			}
 			this.isUsersCountOnCooldown = true;
-			setTimeout(() => (this.isUsersCountOnCooldown = false), this.cooldownMinutes * 60 * 1000);
+			setTimeout(
+				() => (this.isUsersCountOnCooldown = false),
+				this.cooldownMinutes * 60 * 1000
+			);
 			const connectedUsers = await this.discordGetConnectedUsers();
 			const usersCount = connectedUsers.length;
 			await msg.reply(
