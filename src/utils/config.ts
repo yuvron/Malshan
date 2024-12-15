@@ -17,8 +17,15 @@ export const config = {
 	},
 	whatsapp: {
 		chatId: process.env['WHATSAPP_CHAT_ID'],
-		questionMessage: process.env['WHATSAPP_QUESTION_MESSAGE'],
+		whoIsHereMessage: process.env['WHATSAPP_WHO_IS_HERE_MESSAGE'],
+		tldrForMeMessage: process.env['WHATSAPP_TLDR_FOR_ME_MESSAGE'],
 		isLogChatId: process.env['WHATSAPP_IS_LOG_CHAT_ID'].toLowerCase() === 'true',
+	},
+	ai: {
+		apiKey: process.env['AI_API_KEY'],
+		maxTokens: +process.env['AI_MAX_TOKENS'] || 5000,
+		useAdjectives: process.env['AI_USE_ADJECTIVES'].toLowerCase() === 'true' || false,
+		historyMessagesAmount: +process.env['AI_HISTORY_MESSAGES_AMOUNT'] || 150,
 	},
 };
 
